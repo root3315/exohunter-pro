@@ -1,0 +1,16 @@
+{
+    "max_targets": 10,
+    "difficulty_levels": ["easy", "medium", "hard"],
+    "score_thresholds": {
+        "easy": 100,
+        "medium": 250,
+        "hard": 500
+    },
+    "sectors": ["alpha", "beta", "gamma", "delta", "epsilon"],
+    "game_settings": {
+        "target_spawn_rate": 0.7,
+        "bonus_round_enabled": true,
+        "leaderboard_enabled": true
+    },
+    "version": "1.0.0"
+}
