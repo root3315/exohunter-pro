@@ -10,6 +10,8 @@ import random
 from pathlib import Path
 from typing import Optional
 
+from issue_tracker import IssueTracker
+
 
 class ExoHunter:
     """Main game class for ExoHunter Pro."""
@@ -27,6 +29,7 @@ class ExoHunter:
         self.current_difficulty = "easy"
         self.targets_hunted = 0
         self.active_target: Optional[dict] = None
+        self.issue_tracker = IssueTracker()
 
     def _load_config(self) -> dict:
         """Load configuration from JSON file."""
@@ -130,3 +133,69 @@ class ExoHunter:
             "difficulty": self.current_difficulty,
             "active_target": self.active_target,
         }
+
+    def get_repository_files(self) -> list[str]:
+        """
+        Get list of repository files to verify repository is not empty.
+
+        Returns:
+            List of file paths in the repository.
+
+        Fixes:
+            GitHub Issue #1: Repository appears empty - now properly detects files.
+        """
+        repo_files = []
+        for ext in ["*.py", "*.json", "*.md", "*.txt", "*.yaml", "*.yml"]:
+            repo_files.extend(Path(".").glob(ext))
+        return [str(f) for f in repo_files if f.is_file()]
+
+    def verify_repository(self) -> dict:
+        """
+        Verify the repository has files and is properly configured.
+
+        Returns:
+            Dictionary with repository status information.
+
+        Fixes:
+            GitHub Issue #1: Repository Empty - AI Code Improvement Request Failed.
+        """
+        files = self.get_repository_files()
+        return {
+            "is_empty": len(files) == 0,
+            "file_count": len(files),
+            "files": files,
+            "config_exists": self.config_path.exists(),
+            "status": "valid" if files else "empty",
+        }
+
+    def log_issue_activity(
+        self,
+        issue_number: int,
+        activity_type: str,
+        label: str,
+        details: Optional[dict] = None,
+    ) -> dict:
+        """
+        Log activity for a GitHub issue.
+
+        Args:
+            issue_number: The issue number.
+            activity_type: Type of activity (ai_request, ai_response).
+            label: The label associated with the activity.
+            details: Optional additional details.
+
+        Returns:
+            The log entry dictionary.
+
+        Fixes:
+            GitHub Issue #1: AI request/response labeling system.
+        """
+        if activity_type == "ai_request":
+            return self.issue_tracker.log_ai_request(issue_number, label)
+        elif activity_type == "ai_response":
+            response_len = details.get("response_len", 0) if details else 0
+            first_line = details.get("first_line", "") if details else ""
+            return self.issue_tracker.log_ai_response(
+                issue_number, label, response_len, first_line
+            )
+        return {"error": "Invalid activity type"}
